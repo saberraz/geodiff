@@ -46,13 +46,19 @@ IF(WITH_INTERNAL_SQLITE3)
   IF(EXISTS "${CMAKE_BINARY_DIR}/sqlite3.tar.gz")
     MESSAGE("sqlite3 already downloaded")
   ELSE()
+    MESSAGE("Downloading sqlite3")
     FILE(DOWNLOAD "https://www.sqlite.org/2019/sqlite-autoconf-3300100.tar.gz" ${CMAKE_BINARY_DIR}/sqlite3.tar.gz )
     FILE(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/external")
     EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E tar xfz ${CMAKE_BINARY_DIR}/sqlite3.tar.gz
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external
       RESULT_VARIABLE rv)
+    MESSAGE("untar result ${rv}")
   ENDIF()
 
+  FILE(GLOB EXT_DIR ${CMAKE_BINARY_DIR}/external/*)
+  FILE(GLOB EXT_SQ_DIR ${CMAKE_BINARY_DIR}/external/sqlite-autoconf-3300100/*)
+  MESSAGE("external dir content: ${EXT_DIR}")
+  MESSAGE("sqlite3 dir content: ${EXT_SQ_DIR}")
   SET(sqlite3_dir ${CMAKE_BINARY_DIR}/external/sqlite-autoconf-3300100)
   SET(sqlite_src
     ${sqlite3_dir}/sqlite3.c
