@@ -50,16 +50,30 @@ IF(WITH_INTERNAL_SQLITE3)
   ELSE()
     MESSAGE(STATUS "Downloading sqlite3")
     FILE(DOWNLOAD "https://www.sqlite.org/2019/sqlite-autoconf-3300100.tar.gz" ${CMAKE_BINARY_DIR}/sqlite3.tar.gz )
+  ENDIF()
+  file(SIZE "${CMAKE_BINARY_DIR}/sqlite3.tar.gz" SQ_SIZE)
+  MESSAGE(STATUS "Sqlite3 tar gz size ${SQ_SIZE}")
+
+  IF(NOT IS_DIRECTORY "${CMAKE_BINARY_DIR}/external")
     FILE(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/external")
     IF(IS_DIRECTORY "${CMAKE_BINARY_DIR}/external")
       MESSAGE(STATUS "SUCCESS make directory")
     ENDIF()
+  ELSE()
+    MESSAGE(STATUS "external dir exists")
+  ENDIF()
+
+  IF (NOT IS_DIRECTORY "${CMAKE_BINARY_DIR}/external/sqlite-autoconf-3300100")
+    MESSAGE(STATUS "need to unpack sqlite3")
+    EXECUTE_PROCESS(COMMAND tar xvfz "${CMAKE_BINARY_DIR}/sqlite3.tar.gz" -C "${CMAKE_BINARY_DIR}/external"
+      RESULT_VARIABLE rv)
+    MESSAGE(STATUS "REAL untar result ${rv}")
     FILE(GLOB BINARY_DIR ${CMAKE_BINARY_DIR}/*)
     MESSAGE(STATUS "binary dir: ${BINARY_DIR}")
-    EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E tar xvfz "${CMAKE_BINARY_DIR}/sqlite3.tar.gz"
-      WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/external"
-      RESULT_VARIABLE rv)
-    MESSAGE(STATUS "untar result ${rv}")
+    #EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E tar xvfz "${CMAKE_BINARY_DIR}/sqlite3.tar.gz"
+    #  WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/external"
+    #  RESULT_VARIABLE rv)
+    #MESSAGE(STATUS "untar result ${rv}")
     ### check if without working dir
     EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E tar xvfz ${CMAKE_BINARY_DIR}/sqlite3.tar.gz
       RESULT_VARIABLE rv2)
@@ -71,12 +85,17 @@ IF(WITH_INTERNAL_SQLITE3)
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external
       RESULT_VARIABLE rvx)
     MESSAGE(STATUS "untarRRR result ${rvx}")
+  ELSE()
+    MESSAGE(STATUS "unpacked already")
   ENDIF()
 
   FILE(GLOB EXT_DIR ${CMAKE_BINARY_DIR}/external/*)
   FILE(GLOB EXT_SQ_DIR ${CMAKE_BINARY_DIR}/external/sqlite-autoconf-3300100/*)
   MESSAGE(STATUS "external dir content: ${EXT_DIR}")
   MESSAGE(STATUS "sqlite3 dir content: ${EXT_SQ_DIR}")
+  IF (NOT IS_DIRECTORY "${CMAKE_BINARY_DIR}/external/sqlite-autoconf-3300100")
+    MESSAGE("Sqlite extract dir not exists!!!")
+  ENDIF()
   SET(sqlite3_dir ${CMAKE_BINARY_DIR}/external/sqlite-autoconf-3300100)
   SET(sqlite_src
     ${sqlite3_dir}/sqlite3.c
