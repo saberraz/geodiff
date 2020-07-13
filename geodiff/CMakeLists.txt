@@ -51,12 +51,26 @@ IF(WITH_INTERNAL_SQLITE3)
     MESSAGE(STATUS "Downloading sqlite3")
     FILE(DOWNLOAD "https://www.sqlite.org/2019/sqlite-autoconf-3300100.tar.gz" ${CMAKE_BINARY_DIR}/sqlite3.tar.gz )
     FILE(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/external")
+    IF(IS_DIRECTORY "${CMAKE_BINARY_DIR}/external")
+      MESSAGE(STATUS "SUCCESS make directory")
+    ENDIF()
     FILE(GLOB BINARY_DIR ${CMAKE_BINARY_DIR}/*)
     MESSAGE(STATUS "binary dir: ${BINARY_DIR}")
-    EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E tar xfz ${CMAKE_BINARY_DIR}/sqlite3.tar.gz
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external
+    EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E tar xvfz "${CMAKE_BINARY_DIR}/sqlite3.tar.gz"
+      WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/external"
       RESULT_VARIABLE rv)
     MESSAGE(STATUS "untar result ${rv}")
+    ### check if without working dir
+    EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E tar xvfz ${CMAKE_BINARY_DIR}/sqlite3.tar.gz
+      RESULT_VARIABLE rv2)
+    MESSAGE(STATUS "untar2 result ${rv2}")
+    FILE(GLOB BINARY_DIR_2 ${CMAKE_BINARY_DIR}/*)
+    MESSAGE(STATUS "binary dir (2): ${BINARY_DIR_2}")
+    ## check if its wrong
+    EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E tarrrr xvfz ${CMAKE_BINARY_DIR}/sqlite3.tar.gz
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external
+      RESULT_VARIABLE rvx)
+    MESSAGE(STATUS "untarRRR result ${rvx}")
   ENDIF()
 
   FILE(GLOB EXT_DIR ${CMAKE_BINARY_DIR}/external/*)
