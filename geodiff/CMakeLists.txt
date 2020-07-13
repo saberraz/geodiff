@@ -51,6 +51,8 @@ IF(WITH_INTERNAL_SQLITE3)
     MESSAGE(STATUS "Downloading sqlite3")
     FILE(DOWNLOAD "https://www.sqlite.org/2019/sqlite-autoconf-3300100.tar.gz" ${CMAKE_BINARY_DIR}/sqlite3.tar.gz )
     FILE(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/external")
+    FILE(GLOB BINARY_DIR ${CMAKE_BINARY_DIR}/*)
+    MESSAGE(STATUS "binary dir: ${BINARY_DIR}")
     EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E tar xfz ${CMAKE_BINARY_DIR}/sqlite3.tar.gz
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/external
       RESULT_VARIABLE rv)
