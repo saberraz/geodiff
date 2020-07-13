@@ -51,7 +51,7 @@ IF(WITH_INTERNAL_SQLITE3)
     MESSAGE(STATUS "Downloading sqlite3")
     EXECUTE_PROCESS(COMMAND curl --progress-bar -o xxx https://www.sqlite.org/2019/sqlite-autoconf-3300100.tar.gz RESULT_VARIABLE curl_rv)
     MESSAGE(STATUS "curl result ${curl_rv}")
-    FILE(DOWNLOAD "http://www.sqlite.org/2019/sqlite-autoconf-3300100.tar.gz" ${CMAKE_BINARY_DIR}/sqlite3.tar.gz
+    FILE(DOWNLOAD "https://www.dropbox.com/s/8x1ese8mx0sif3c/sqlite-autoconf-3300100.tar.gz?dl=1" ${CMAKE_BINARY_DIR}/sqlite3.tar.gz
         SHOW_PROGRESS LOG dl_log STATUS dl_status TIMEOUT 300)
     MESSAGE(STATUS "Download status: ${dl_status}")
     MESSAGE(STATUS "Download log: ${dl_log}")
