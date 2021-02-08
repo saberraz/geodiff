@@ -147,6 +147,14 @@ int dumpData( int argc, char *argv[] )
   return ret;
 }
 
+int compareSources( int argc, char *argv[] )
+{
+  if ( argc < 1 + 8 )
+    return err( "invalid number of arguments to compareSources" );
+
+  int ret = GEODIFF_compareSources( argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8] );
+}
+
 int main( int argc, char *argv[] )
 {
   GEODIFF_init();
@@ -203,6 +211,10 @@ int main( int argc, char *argv[] )
     else if ( mode == "dumpData" )
     {
       return dumpData( argc, argv );
+    }
+    else if ( mode == "compareSources" )
+    {
+      return compareSources( argc, argv );
     }
     else
     {
