@@ -893,9 +893,15 @@ void SqliteDriver::createTables( const std::vector<TableSchema> &tables )
 
   for ( const TableSchema &tbl : tables )
   {
-    addGpkgCrsDefinition( mDb, tbl.crs );
-    addGpkgSpatialTable( mDb, tbl, Extent() );   // TODO: is it OK to set zeros?
-
+    if ( startsWith( tbl.name, "gpkg_") )
+      continue;
+      
+    if ( tbl.geometryColumn() != SIZE_MAX )
+    {
+      addGpkgCrsDefinition( mDb, tbl.crs );
+      addGpkgSpatialTable( mDb, tbl, Extent() );   // TODO: is it OK to set zeros?
+    }
+    
     std::string sql, pkeyCols, columns;
     for ( const TableColumnInfo &c : tbl.columns )
     {

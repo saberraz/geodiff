@@ -146,7 +146,9 @@ int GEODIFF_compareSources( const char *driverSrcName, const char *driverSrcExtr
     }
 
     return GEODIFF_createChangesetEx( "sqlite", "", srcGpkg.c_str(), dstGpkg.c_str(), changeset );
+
     //TODO: remove temp files
+    //TODO: add tests
   }
 }
 
