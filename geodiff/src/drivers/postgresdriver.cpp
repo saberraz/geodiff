@@ -167,6 +167,9 @@ std::vector<std::string> PostgresDriver::listTables( bool useModified )
   std::vector<std::string> tables;
   for ( int i = 0; i < res.rowCount(); ++i )
   {
+    if ( startsWith( res.value( i, 0 ), "gpkg_" ) )
+      continue;
+
     tables.push_back( res.value( i, 0 ) );
   }
 
@@ -746,7 +749,7 @@ void PostgresDriver::applyChangeset( ChangesetReader &reader )
     std::string tableName = entry.table->name;
 
     // TODO: in the future sqlite driver should not add any changes to meta tables
-    if ( tableName.rfind( "gpkg_", 0 ) == 0 )
+    if ( startsWith( tableName, "gpkg_") )
       continue;   // skip any changes to GPKG meta tables
 
     if ( tableName != lastTableName )
@@ -895,7 +898,7 @@ void PostgresDriver::createTables( const std::vector<TableSchema> &tables )
   for ( const TableSchema &tbl : tables )
   {
     // TODO: in the future sqlite driver should not add any changes to meta tables
-    if ( tbl.name.rfind( "gpkg_" ) == 0 )
+    if ( startsWith( tbl.name, "gpkg_" ) )
       continue;   // skip any changes to GPKG meta tables
 
     std::string sql, pkeyCols, columns;

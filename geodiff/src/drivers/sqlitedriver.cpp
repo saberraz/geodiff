@@ -201,7 +201,7 @@ std::vector<std::string> SqliteDriver::listTables( bool useModified )
     */
 
     // table handled by triggers trigger_*_feature_count_*
-    if ( startsWith( tableName, "gpkg_ogr_contents" ) )
+    if ( startsWith( tableName, "gpkg_" ) )
       continue;
     // table handled by triggers rtree_*_geometry_*
     if ( startsWith( tableName, "rtree_" ) )
