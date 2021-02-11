@@ -536,7 +536,7 @@ TEST( PostgresDriverTest, test_capital_letters )
   PQfinish( c );
 }
 
-TEST( PostgresDriverTest, test_compare_sources_pg_to_sqlite )
+TEST( PostgresDriverTest, test_changesetdr_sqlite_to_pg )
 {
   std::string conninfo = pgTestConnInfo();
 
@@ -545,7 +545,7 @@ TEST( PostgresDriverTest, test_compare_sources_pg_to_sqlite )
   PGconn *c = PQconnectdb( conninfo.c_str() );
   ASSERT_EQ( PQstatus( c ), CONNECTION_OK );
 
-  std::string testname = "test_compare_sources_pg_to_sqlite";
+  std::string testname = "test_changesetdr_sqlite_to_pg";
   std::string baseGpkg = pathjoin( testdir(), "compare_sources", "base.gpkg" );
 
   makedir( pathjoin( tmpdir(), testname ) );
@@ -563,57 +563,55 @@ TEST( PostgresDriverTest, test_compare_sources_pg_to_sqlite )
   ret = GEODIFF_applyChangesetEx( "sqlite", "", toApplyGpkg.c_str(), changeset.c_str() );
   EXPECT_EQ( ret, GEODIFF_SUCCESS );
 
-  std::string comparingGpkg = pathjoin( testdir(), "compare_sources", "to-compare.gpkg" );
-  
-  EXPECT_TRUE( equals( toApplyGpkg, comparingGpkg, true ) );
+  std::string comparingGpkg = pathjoin( testdir(), "compare_sources", "modified.gpkg" );
+
+  EXPECT_TRUE( equals( toApplyGpkg, comparingGpkg ) );
 
   PQfinish( c );
 }
 
-TEST( PostgresDriverTest, test_compare_sources_sqlite_to_pg )
+TEST( PostgresDriverTest, test_changesetdr_pg_to_sqlite )
 {
-  // std::string conninfo = pgTestConnInfo();
+   std::string conninfo = pgTestConnInfo();
 
-  // execSqlCommands( conninfo, pathjoin( testdir(), "postgres", "base.sql" ) );
+   execSqlCommands( conninfo, pathjoin( testdir(), "postgres", "base.sql" ) );
 
-  // PGconn *c = PQconnectdb( conninfo.c_str() );
-  // ASSERT_EQ( PQstatus( c ), CONNECTION_OK );
+   PGconn *c = PQconnectdb( conninfo.c_str() );
+   ASSERT_EQ( PQstatus( c ), CONNECTION_OK );
 
-  // std::string testname = "test_compare_sources_sqlite_to_pg";
-  // std::string modifiedGpkg = pathjoin( testdir(), "compare_sources", "to-compare.gpkg" );
+   std::string testname = "test_changesetdr_pg_to_sqlite";
+   std::string modifiedGpkg = pathjoin( testdir(), "compare_sources", "modified.gpkg" );
 
-  // makedir( pathjoin( tmpdir(), testname ) );
-  // std::string changeset = pathjoin( tmpdir(), testname, "changeset.diff");
+   makedir( pathjoin( tmpdir(), testname ) );
+   std::string changeset = pathjoin( tmpdir(), testname, "changeset.diff");
 
-  // // compare PG base, sqlite modified
-  // int ret = GEODIFF_compareSources( "postgres", conninfo.c_str(), "gd_base", "sqlite", "", modifiedGpkg.c_str(), changeset.c_str() );
-  // EXPECT_EQ( ret, GEODIFF_SUCCESS );
+   // compare PG base, sqlite modified
+   int ret = GEODIFF_createChangesetDr( "postgres", conninfo.c_str(), "gd_base", "sqlite", "", modifiedGpkg.c_str(), changeset.c_str() );
+   EXPECT_EQ( ret, GEODIFF_SUCCESS );
 
-  // EXPECT_TRUE( fileExists( changeset ) );
+   EXPECT_TRUE( fileExists( changeset ) );
 
-  // std::string toApplyGpkg = pathjoin(tmpdir(), testname, "to-apply.gpkg");
-  // filecopy( toApplyGpkg, baseGpkg );
+   ret = GEODIFF_applyChangesetEx( "postgres", conninfo.c_str(), "gd_base", changeset.c_str() );
+   EXPECT_EQ( ret, GEODIFF_SUCCESS );
 
-  // ret = GEODIFF_applyChangesetEx( "sqlite", "", toApplyGpkg.c_str(), changeset.c_str() );
-  // EXPECT_EQ( ret, GEODIFF_SUCCESS );
+   // check value
+   PostgresResult resTestFid5( execSql( c, "SELECT \"name\" FROM \"gd_base\".\"simple\" where fid = 4" ) );
+   EXPECT_EQ( resTestFid5.value( 0, 0 ), "my new point A" );
 
-  // std::string comparingGpkg = pathjoin( testdir(), "compare_sources", "to-compare.gpkg" );
-  
-  // EXPECT_TRUE( equals( toApplyGpkg, comparingGpkg, true ) );
-
-  // PQfinish( c );
+   PQfinish( c );
 }
 
-TEST( PostgresDriverTest, test_compare_sources_pg_to_pg )
+TEST( PostgresDriverTest, test_changesetdr_pg_to_pg )
 {
   std::string conninfo = pgTestConnInfo();
 
+  execSqlCommands( conninfo, pathjoin( testdir(), "postgres", "base.sql" ) );
   execSqlCommands( conninfo, pathjoin( testdir(), "postgres", "inserted_1_a.sql" ) );
 
   PGconn *c = PQconnectdb( conninfo.c_str() );
   ASSERT_EQ( PQstatus( c ), CONNECTION_OK );
 
-  std::string testname = "test_compare_sources_pg_to_pg";
+  std::string testname = "test_changesetdr_pg_to_pg";
 
   makedir( pathjoin( tmpdir(), testname ) );
   std::string changeset = pathjoin( tmpdir(), testname, "changeset.diff");
@@ -625,7 +623,7 @@ TEST( PostgresDriverTest, test_compare_sources_pg_to_pg )
   ChangesetReader reader;
   reader.open( changeset );
 
-  EXPECT_TRUE( reader.isEmpty() );
+  EXPECT_TRUE( !reader.isEmpty() );
 }
 
 TEST( PostgresDriverTest, test_ignore_gpkg_meta_tables )
@@ -637,6 +635,8 @@ TEST( PostgresDriverTest, test_ignore_gpkg_meta_tables )
   PGconn *c = PQconnectdb( conninfo.c_str() );
   ASSERT_EQ( PQstatus( c ), CONNECTION_OK );
 
+  // Some geopackages in testdata (like base or inserted_1_A) do not contain meta tables coming from former versions on GPKG.
+  // This resulted in table mismatch between sources and thus failing some operations in geodiff API.
   std::string gpkg( pathjoin( testdir(), "2_inserts", "inserted_1_A.gpkg" ) );
 
   EXPECT_EQ( GEODIFF_createChangesetDr( "postgres", conninfo.c_str(), "gd_base", "sqlite", "", gpkg.c_str(), "/home/tomasmizera/projects/temp/tultra.diff" ),
