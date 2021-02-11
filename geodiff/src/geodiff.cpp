@@ -105,7 +105,7 @@ int GEODIFF_createChangesetEx( const char *driverName, const char *driverExtraIn
   return GEODIFF_SUCCESS;
 }
 
-int GEODIFF_createChangesetAcrossDrivers( const char *driverSrcName, const char *driverSrcExtraInfo, const char *src,
+int GEODIFF_createChangesetDr( const char *driverSrcName, const char *driverSrcExtraInfo, const char *src,
                             const char *driverDstName, const char *driverDstExtraInfo, const char *dst,
                             const char *changeset )
 {

@@ -28,6 +28,7 @@ void help()
   printf( " [-ae, applyChangesetEx]   = apply changeset with driver, args: driverName driverExtraInfo base changeset\n\n" );
   printf( " [rebaseEx]                = rebase data with driver, args: driverName driverExtraInfo base modified base2their conflict\n\n" );
   printf( " [dumpData]                = dump data, args: driverName driverExtraInfo base changeset\n\n" );
+  printf( " [-cd, createChangesetDr]  = creates changeset across drivers, args: driverSrcName driverSrcExtraInfo src driverDstName driverDstExtraInfo dst changeset\n\n" );
 }
 
 int err( const std::string msg )
@@ -147,12 +148,13 @@ int dumpData( int argc, char *argv[] )
   return ret;
 }
 
-int compareSources( int argc, char *argv[] )
+int createChangesetDr( int argc, char *argv[] )
 {
   if ( argc < 1 + 8 )
-    return err( "invalid number of arguments to compareSources" );
+    return err( "invalid number of arguments to createChangesetDr" );
 
-  int ret = GEODIFF_compareSources( argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8] );
+  int ret = GEODIFF_createChangesetDr( argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8] );
+  return ret;
 }
 
 int main( int argc, char *argv[] )
@@ -212,9 +214,9 @@ int main( int argc, char *argv[] )
     {
       return dumpData( argc, argv );
     }
-    else if ( mode == "compareSources" )
+    else if ( mode == "createChangesetDr" || mode == "-cd" )
     {
-      return compareSources( argc, argv );
+      return createChangesetDr( argc, argv );
     }
     else
     {

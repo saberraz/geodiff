@@ -552,7 +552,7 @@ TEST( PostgresDriverTest, test_compare_sources_pg_to_sqlite )
   std::string changeset = pathjoin( tmpdir(), testname, "changeset.diff");
 
   // compare sqlite base, PG modified
-  int ret = GEODIFF_compareSources( "sqlite", "", baseGpkg.c_str(), "postgres", conninfo.c_str(), "gd_inserted_1_a", changeset.c_str() );
+  int ret = GEODIFF_createChangesetDr( "sqlite", "", baseGpkg.c_str(), "postgres", conninfo.c_str(), "gd_inserted_1_a", changeset.c_str() );
   EXPECT_EQ( ret, GEODIFF_SUCCESS );
 
   EXPECT_TRUE( fileExists( changeset ) );
@@ -619,7 +619,7 @@ TEST( PostgresDriverTest, test_compare_sources_pg_to_pg )
   std::string changeset = pathjoin( tmpdir(), testname, "changeset.diff");
 
   // compare the same drivers
-  int ret = GEODIFF_createChangesetAcrossDrivers( "postgres", conninfo.c_str(), "gd_inserted_1_a", "postgres", conninfo.c_str(), "gd_inserted_1_a", changeset.c_str() );
+  int ret = GEODIFF_createChangesetDr( "postgres", conninfo.c_str(), "gd_base", "postgres", conninfo.c_str(), "gd_inserted_1_a", changeset.c_str() );
   EXPECT_EQ( ret, GEODIFF_SUCCESS );
 
   ChangesetReader reader;
@@ -639,7 +639,7 @@ TEST( PostgresDriverTest, test_ignore_gpkg_meta_tables )
 
   std::string gpkg( pathjoin( testdir(), "2_inserts", "inserted_1_A.gpkg" ) );
 
-  EXPECT_EQ( GEODIFF_createChangesetAcrossDrivers( "postgres", conninfo.c_str(), "gd_base", "sqlite", "", gpkg.c_str(), "/home/tomasmizera/projects/temp/tultra.diff" ),
+  EXPECT_EQ( GEODIFF_createChangesetDr( "postgres", conninfo.c_str(), "gd_base", "sqlite", "", gpkg.c_str(), "/home/tomasmizera/projects/temp/tultra.diff" ),
              GEODIFF_SUCCESS );
 
   PQfinish( c );
