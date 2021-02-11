@@ -105,13 +105,13 @@ int GEODIFF_createChangesetEx( const char *driverName, const char *driverExtraIn
   return GEODIFF_SUCCESS;
 }
 
-int GEODIFF_compareSources( const char *driverSrcName, const char *driverSrcExtraInfo, const char *src,
+int GEODIFF_createChangesetAcrossDrivers( const char *driverSrcName, const char *driverSrcExtraInfo, const char *src,
                             const char *driverDstName, const char *driverDstExtraInfo, const char *dst,
                             const char *changeset )
 {
   if ( !driverSrcName || !driverDstName || !src || !dst || !changeset )
   {
-    Logger::instance().error( "NULL arguments to GEODIFF_compareSources" );
+    Logger::instance().error( "NULL arguments to GEODIFF_createChangesetAcrossDrivers" );
     return GEODIFF_ERROR;
   }
 
@@ -124,6 +124,8 @@ int GEODIFF_compareSources( const char *driverSrcName, const char *driverSrcExtr
     // copy both sources to geopackage and create changeset
     std::string srcGpkg( src );
     std::string dstGpkg( dst );
+
+    //TODO: remove temp files
 
     if ( strcmp( driverSrcName, "sqlite" ) != 0 )
     {
@@ -146,9 +148,6 @@ int GEODIFF_compareSources( const char *driverSrcName, const char *driverSrcExtr
     }
 
     return GEODIFF_createChangesetEx( "sqlite", "", srcGpkg.c_str(), dstGpkg.c_str(), changeset );
-
-    //TODO: remove temp files
-    //TODO: add tests
   }
 }
 

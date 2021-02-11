@@ -619,13 +619,30 @@ TEST( PostgresDriverTest, test_compare_sources_pg_to_pg )
   std::string changeset = pathjoin( tmpdir(), testname, "changeset.diff");
 
   // compare the same drivers
-  int ret = GEODIFF_compareSources( "postgres", conninfo.c_str(), "gd_inserted_1_a", "postgres", conninfo.c_str(), "gd_inserted_1_a", changeset.c_str() );
+  int ret = GEODIFF_createChangesetAcrossDrivers( "postgres", conninfo.c_str(), "gd_inserted_1_a", "postgres", conninfo.c_str(), "gd_inserted_1_a", changeset.c_str() );
   EXPECT_EQ( ret, GEODIFF_SUCCESS );
 
   ChangesetReader reader;
   reader.open( changeset );
 
   EXPECT_TRUE( reader.isEmpty() );
+}
+
+TEST( PostgresDriverTest, test_ignore_gpkg_meta_tables )
+{
+  std::string conninfo = pgTestConnInfo();
+
+  execSqlCommands( conninfo, pathjoin( testdir(), "postgres", "base.sql" ) );
+
+  PGconn *c = PQconnectdb( conninfo.c_str() );
+  ASSERT_EQ( PQstatus( c ), CONNECTION_OK );
+
+  std::string gpkg( pathjoin( testdir(), "2_inserts", "inserted_1_A.gpkg" ) );
+
+  EXPECT_EQ( GEODIFF_createChangesetAcrossDrivers( "postgres", conninfo.c_str(), "gd_base", "sqlite", "", gpkg.c_str(), "/home/tomasmizera/projects/temp/tultra.diff" ),
+             GEODIFF_SUCCESS );
+
+  PQfinish( c );
 }
 
 int main( int argc, char **argv )
