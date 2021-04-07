@@ -6,6 +6,10 @@ ls -la /usr/local/Cellar
 brew update
 brew install ninja
 brew install pyenv
+
+echo "Available python versions in pyenv:"
+pyenv install --list
+
 for VER in "3.8.7" "3.7.4" "3.6.8"
 do
   pyenv install $VER
