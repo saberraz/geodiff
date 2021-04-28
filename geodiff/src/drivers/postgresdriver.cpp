@@ -620,6 +620,7 @@ static void handleUpdated( const std::string &schemaNameBase, const std::string 
 {
   std::string sqlModified = sqlFindModified( schemaNameBase, schemaNameModified, tableName, tbl );
   PostgresResult res( execSql( conn, sqlModified ) );
+  printf("%s\n", sqlModified.data());
 
   int rows = res.rowCount();
   for ( int r = 0; r < rows; ++r )
@@ -804,6 +805,7 @@ void PostgresDriver::applyChangeset( ChangesetReader &reader )
 
   int conflictCount = 0;
   ChangesetEntry entry;
+  std::string insertSqls;
   while ( reader.nextEntry( entry ) )
   {
     std::string tableName = entry.table->name;
@@ -839,7 +841,11 @@ void PostgresDriver::applyChangeset( ChangesetReader &reader )
     if ( entry.op == ChangesetEntry::OpInsert )
     {
       std::string sql = sqlForInsert( mBaseSchema, tableName, tbl, entry.newValues );
+      insertSqls += sql + ";";
+
+      /*
       PostgresResult res( execSql( mConn, sql ) );
+
       if ( res.status() != PGRES_COMMAND_OK )
       {
         logApplyConflict( "insert_failed", entry );
@@ -858,7 +864,7 @@ void PostgresDriver::applyChangeset( ChangesetReader &reader )
           autoIncrementTablesToFix[tableName] = pkey;
         else
           autoIncrementTablesToFix[tableName] = std::max( autoIncrementTablesToFix[tableName], pkey );
-      }
+      }*/
     }
     else if ( entry.op == ChangesetEntry::OpUpdate )
     {
@@ -895,6 +901,19 @@ void PostgresDriver::applyChangeset( ChangesetReader &reader )
     }
     else
       throw GeoDiffException( "Unexpected operation" );
+
+    if ( insertSqls.size() >= 1000000 )
+    {
+      printf("partial exec\n");
+      PostgresResult res( execSql( mConn, insertSqls ) );
+      insertSqls.clear();
+    }
+  }
+
+  if ( !insertSqls.empty() )
+  {
+    printf("final exec\n");
+    PostgresResult res( execSql( mConn, insertSqls ) );
   }
 
   // at the end, update any SEQUENCE objects if needed
